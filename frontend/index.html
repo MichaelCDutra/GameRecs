@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="index.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet" />
+  <title>GameRecs - O Maior Banco de Jogos</title>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="top-nav">
+    <div class="logo" style="cursor: pointer;" onclick="window.location.reload();">GAME<span>RECS</span></div>
+    
+    <div class="search-bar">
+      <form class="search-form">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="game-search" placeholder="Buscar entre 898,040 jogos..." autocomplete="off"/>
+      </form>
+      <div id="autocomplete-list" class="hidden"></div>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-link active" data-filter="home">Início</a>
+        <a href="#" class="nav-link" data-filter="reviews">Análises</a>
+        
+        <h3 class="nav-group-title">Lançamentos</h3>
+        <a href="#" class="nav-link" data-filter="last30"><span class="icon">⭐</span> Últimos 30 dias</a>
+        <a href="#" class="nav-link" data-filter="thisWeek"><span class="icon">🔥</span> Essa semana</a>
+        <a href="#" class="nav-link" data-filter="nextWeek"><span class="icon">⏭️</span> Próxima semana</a>
+        
+        <h3 class="nav-group-title">Destaques</h3>
+        <a href="#" class="nav-link" data-filter="bestYear"><span class="icon">🏆</span> Melhores do ano</a>
+        <a href="#" class="nav-link" data-filter="popularNext"><span class="icon">📊</span> Populares em 2025</a>
+        <a href="#" class="nav-link" data-filter="allTime"><span class="icon">👑</span> Top 250 de sempre</a>
+        
+        <h3 class="nav-group-title">Plataformas</h3>
+        <a href="#" class="nav-link" data-filter="pc"><span class="icon">💻</span> PC</a>
+        <a href="#" class="nav-link" data-filter="playstation"><span class="icon">🎮</span> PlayStation</a>
+        <a href="#" class="nav-link" data-filter="xbox"><span class="icon">🟢</span> Xbox</a>
+        <a href="#" class="nav-link" data-filter="nintendo"><span class="icon">🍄</span> Nintendo</a>
+      </nav>
+    </aside>
+
+    <!-- Main Dynamic Content -->
+    <main id="main-content">
+      
+      <!-- HOME/GRID VIEW -->
+      <div id="view-home">
+        <h1 id="current-view-title">Novidades em Alta</h1>
+        <p id="current-view-subtitle">Baseado em popularidade e data de lançamento</p>
+        
+        <div id="filters-container" class="display-options">
+          <div class="custom-select">
+            <span>Ordenar por:</span>
+            <select id="order-select">
+              <option value="-added">Relevância</option>
+              <option value="-released">Data de Lançamento</option>
+              <option value="-rating">Classificação</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="results"></div>
+        <button id="load-more-btn" class="hidden">Carregar mais</button>
+      </div>
+      
+      <!-- GAME DETAILED VIEW (Hidden initially) -->
+      <div id="view-game" class="hidden">
+          <div class="game-view-layout">
+              <div class="game-main-info" id="game-info-left">
+                  <!-- Breadcrumbs, title, platforms, play actions, about text injected here -->
+              </div>
+              <div class="game-side-info" id="game-info-right">
+                  <!-- Media grid, where to buy injected here -->
+              </div>
+          </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script defer src="index.js"></script>
+</body>
+</html>
