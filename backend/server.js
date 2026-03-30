@@ -1,14 +1,23 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const dotenv = require('dotenv');
 const path = require('path');
+const dotenv = require('dotenv');
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const RAWG_API_KEY = process.env.RAWG_API_KEY;
+
+// Verificação de Segurança da API Key
+if (!RAWG_API_KEY) {
+  console.error('\x1b[31m%s\x1b[0m', '❌ ERRO CRÍTICO: RAWG_API_KEY não encontrada!');
+  console.error('Certifique-se de que o arquivo backend/.env existe e contém a chave.');
+} else {
+  console.log('\x1b[32m%s\x1b[0m', '✅ RAWG_API_KEY carregada com sucesso.');
+}
+
 const RAWG_BASE_URL = 'https://api.rawg.io/api';
 
 app.use(cors());
@@ -114,6 +123,11 @@ app.get('/api/games/:slug/stores', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running optimally on http://localhost:${PORT}`);
-});
+module.exports = app;
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 SERVIDOR RODANDO EM: http://localhost:${PORT}`);
+    console.log(`Porta alternativa 3005 usada para evitar conflitos.\n`);
+  });
+}

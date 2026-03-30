@@ -1,7 +1,7 @@
 // =================================================================
 // 1. GLOBAL VARIABLES & SELECTORS
 // =================================================================
-const API_BASE_URL = "http://localhost:3000/api";
+const API_BASE_URL = "/api";
 
 const viewHome = document.getElementById("view-home");
 const viewGame = document.getElementById("view-game");
@@ -28,8 +28,15 @@ let debounceTimeout = null;
 const gameCache = new Map();
 
 // =================================================================
-// 2. UX UTILITIES
+// 2. UX UTILITIES & SECURITY
 // =================================================================
+function escapeHTML(str) {
+  if (!str) return "";
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 function showToast(message) {
   const toast = document.createElement('div');
   toast.classList.add('toast');
@@ -113,7 +120,10 @@ async function loadFeed(queryStr = "", page = 1, append = false) {
           loadMoreBtn.classList.remove("hidden");
       }
     } else if (!append) {
-      resultsContainer.innerHTML = `<p style="color:#888; font-size:1.2rem; padding: 40px;">Nenhum jogo encontrado para esta busca.</p>`;
+      const msg = document.createElement("p");
+      msg.style.cssText = "color:#888; font-size:1.2rem; padding: 40px;";
+      msg.textContent = "Nenhum jogo encontrado para esta busca.";
+      resultsContainer.appendChild(msg);
     }
   } catch (error) {
     console.error(error);
@@ -135,21 +145,26 @@ function createGameCard(game) {
   const genres = game.genres?.map(g => g.name).join(', ') || 'Ação';
   const releaseDate = game.released ? new Date(game.released).toLocaleDateString('pt-BR', { timeZone: 'UTC'}) : 'TBA';
 
+  const safeName = escapeHTML(game.name);
+  const safePlatforms = escapeHTML(platforms);
+  const safeGenres = escapeHTML(genres);
+  const safeRelease = escapeHTML(releaseDate);
+
   card.innerHTML = `
     <div class="card-media">
-      <img src="${game.background_image || 'https://via.placeholder.com/400x200?text=GAME'}" alt="${game.name}" loading="lazy"/>
+      <img src="${game.background_image || 'https://via.placeholder.com/400x200?text=GAME'}" alt="${safeName}" loading="lazy"/>
     </div>
     <div class="card-info">
-      <div class="platforms">${platforms}</div>
-      <div class="card-title">${game.name}</div>
+      <div class="platforms">${safePlatforms}</div>
+      <div class="card-title">${safeName}</div>
       <div class="card-metrics">
         <button class="metric-btn fav-btn ${isFav ? 'favorited' : ''}" data-slug="${game.slug}">
            ${isFav ? '✓ Adicionado' : '+ Adicionar'}
         </button>
       </div>
       <div class="card-details-hover">
-         <div class="detail-row"><span class="detail-label">Lançamento:</span> <span class="detail-value">${releaseDate}</span></div>
-         <div class="detail-row"><span class="detail-label">Gêneros:</span> <span class="detail-value">${genres}</span></div>
+         <div class="detail-row"><span class="detail-label">Lançamento:</span> <span class="detail-value">${safeRelease}</span></div>
+         <div class="detail-row"><span class="detail-label">Gêneros:</span> <span class="detail-value">${safeGenres}</span></div>
          <div class="detail-row"><span class="detail-label">Nota Média:</span> <span class="detail-value">★ ${game.rating || 'N/A'}</span></div>
       </div>
     </div>
@@ -229,15 +244,17 @@ function renderDetailedGame(gameData) {
       <div class="recommended-games">
           <h3>Jogos Semelhantes Recomendados</h3>
           <div class="recommended-grid">
-              ${recommendations.map(r => `
+              ${recommendations.map(r => {
+                  const rName = escapeHTML(r.name);
+                  return `
                   <div class="mini-card" data-slug="${r.slug}" data-bg="${r.background_image}">
                       <img src="${r.background_image || 'https://via.placeholder.com/300x150?text=IMG'}" loading="lazy"/>
                       <div class="mini-card-info">
-                          <div class="mini-card-title" title="${r.name}">${r.name}</div>
+                          <div class="mini-card-title" title="${rName}">${rName}</div>
                           <div class="mini-card-btn">+ Detalhes</div>
                       </div>
                   </div>
-              `).join('')}
+              `}).join('')}
           </div>
       </div>`;
   }
@@ -246,11 +263,11 @@ function renderDetailedGame(gameData) {
     <div class="breadcrumbs">
         <a href="#" onclick="setView('home'); return false;">INÍCIO</a> &gt; 
         <a href="#">JOGOS</a> &gt; 
-        <span>${details.name.toUpperCase()}</span>
+        <span>${escapeHTML(details.name.toUpperCase())}</span>
     </div>
     <div class="game-header">
        ${details.released ? `<div class="game-publish-date">${new Date(details.released).toLocaleDateString('pt-BR', { timeZone: 'UTC'})}</div>` : ''}
-       <h1 class="game-title">${details.name}</h1>
+       <h1 class="game-title">${escapeHTML(details.name)}</h1>
     </div>
     
     <div class="game-actions-bar">
@@ -283,11 +300,14 @@ function renderDetailedGame(gameData) {
 
     <div class="about-section">
         <h3 class="about-title">Sobre o Jogo</h3>
-        <div class="about-text">${details.description_raw || 'Nenhuma descrição técnica disponível para este título.'}</div>
+        <div class="about-text"></div>
     </div>
     
     ${recommendedHTML}
   `;
+  
+  // Usar textContent para a descrição (Sanitização via DOM)
+  leftPanel.querySelector('.about-text').textContent = details.description_raw || 'Nenhuma descrição técnica disponível para este título.';
 
   const trailer = movies.find(m => m.data?.max) || movies[0];
   let topMediaHTML = "";
